@@ -42,6 +42,7 @@ The executable is generated to `doulevo.exe` in the current directory.
 
 Some commands for testing...
 
+
 ### Creating a project with a local plugin
 
 ```bash
@@ -76,7 +77,7 @@ npx ts-node src/index.ts --version
 Use the `help` command:
 
 ```bash
-npx ts-node src/index.ts help
+npx ts-node src/index.ts --help
 ```
 
 Or no command:
@@ -85,13 +86,19 @@ Or no command:
 npx ts-node src/index.ts
 ```
 
+Or get help for a sub command, eg:
+
+```bash
+npx ts-node src/index.ts create --help
+```
+
 ### Building the project
 
 ```bash
 npx ts-node src/index.ts build --project=./test-project --local-plugin=./test-plugin --debug
 ```
 
-Dev  mode:
+Dev mode:
 
 ```bash
 npx ts-node src/index.ts build --project=./test-project --local-plugin=./test-plugin --mode=dev --debug
@@ -143,4 +150,16 @@ Follow:
 
 ```bash
 npx ts-node src/index.ts logs --follow --project=./test-project --local-plugin=./test-plugin --debug
+```
+
+### Viewing imagesiamges for the project
+
+```bash
+npx ts-node src/index.ts ls --project=./test-project --local-plugin=./test-plugin --debug
+```
+
+### Viewing containers for the project
+
+```bash
+npx ts-node src/index.ts ps --project=./test-project --local-plugin=./test-plugin --debug
 ```

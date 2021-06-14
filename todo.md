@@ -1,50 +1,46 @@
+# Next relesae
+
+- --version
+- help command
+- Dev guide
+- User guide
+- Plugin devs guide
+- build command
+- up command
+- down command
+
+# Key idea
+
+- Infrastructure by convention
+
 # Todo
 
-- !! Move appData to an injectable !!
+- Could store the docker and kube files in the .doulevo dir. This could be the basis for gitops?
 
-- Do a git init on new project
-- Need a interface/class for Git
-- Ask more questions for project type (e.g. nodejs-javascript-express-jest)
-  - How do we know what questions to ask?
-    - There has to be a project type mannifest somewhere.
-
-- Starting to need some automated tests!
-    - Unit + integration
-
-- Automatically pull changes to template if it needs to be updated.
-
-- Node.js version should be an input to the create template.
+- I'm so close to an actual doulevo tech demo!
+- DL video. How to make a template.
+  
+- The next plugin for Doulevo should be TypeScript!
 
 - Better readme
   - Install / usage guide
   - Developers guides
   - Template authors guide
 
-- Better help
-  - Usage when no args
-
-- Do the first release of the exe!
-
-- Need some kind of DI!!
-  - Inject the progress bar thingy...
-  - Inject paths.
-  - Logger (verbose logging)
-
-- How to download a plugin?
-  - Git!
-- How to download a template?
-  - Git!
 - Download Docker / Kubectl
   - It's actually going to be pretty hard to run Docker on Windows, it needs WSL2!
   - For the moment Docker can't be bundled.
-- Mustach /  handlebars templates.
-  - Inflate-template already supports this.
 - Where do plugins and execuables get stored?
   - In the app data directory.
 - Need a separate command to set the application.
 - How does backend authentication work?
+    - Can just reply on Kubectl auth for now.
 
 - How will I hash files to know if baked in files have changed?
+  - Can I get a hash from Git for a file or the whole project?
+    - Listing 2.8 in gitops book has example of using git to make a version number
+  - Ask git if working copy has changed?
+  - Probably too inflexible to have the CD pipeine built into the product backend. But I can still use GitOps! Just use the Git container registry!
 - How do I know what the baked in files are? This will be different for dev and prod.
 
 - Use inflate-template to expand a template on disk.
@@ -52,47 +48,47 @@
   - Need to support pre compiled tempates.
   - Need to document the template creation process.
 
-- Need to make my own simple package manager module.
-  - NO. Git is perfectly suited for this.
-  - Need to be able to grab a package from the internet by URL.
-  - Unzip / untar a package.
-  - Need to be able to cache a package locally.
-  - Is there a package manager I can simply reuse?
-    - Is npm included in my node.js-based executable?
-  - https://medium.com/@sdboyer/so-you-want-to-write-a-package-manager-4ae9c17d9527
+- Could doulevo use something like minikube? Could I run docker build on minikube?
+- BuildKit cli could be really useful with a local Kubcluster. Could use this with minikube! Then do away with Docker!!
 
+## To look at
 
-- a simple package manager
-    don't have package directory locally
-        if don't have zip file
-            download zip file from url
-              - https://www.npmjs.com/package/nodejs-file-downloader
-              - https://www.npmjs.com/package/turbo-downloader
-        
-        unpack zip file
-        - https://npm.io/search/keyword:unzip
-        - https://npm.io/package/decompress
-    - All I need is Git!!
+- Stern!
+- Argo
+- Tekton
+- Flux
+- Backstage
+- Porter: https://porter.sh/ (bundle the application?)
+- https://github.com/porter-dev/porter
+- BuildKit (build in Kubernetes, maybe don't need to install Docker?) https://github.com/vmware-tanzu/buildkit-cli-for-kubectl
+- https://microk8s.io/ (small Kubernetes, could work for local testing)
+  - This is too hard.
+  - Just going to rely on Docker and WSL2, Docker is needed anyway to build and push!
+- Flux https://fluxcd.io/ https://github.com/fluxcd/flux (git ops)
+- Keptn https://keptn.sh/ (git ops / cd?)
+- https://brigade.sh/
+- https://www.telepresence.io/ (could be useful for connecting local services to a cluster)
+- https://kudo.dev/ (could make an operator for Doulevo?)
+- https://buildpacks.io/ (build any kind of project? could allow me to suport many project types out of the box)
 
-# Plugins
+## Future
 
-- doulevo create
-
-    - Python template
-    - JS Template
-
-
-- doulevo up
-
-    - Docker build
-      - Python
-      - Node.js
-      - etc
-
-
-- doulevo deploy
-
-    - Kubernetes deploy
-      - Python
-      - Node.js
-      - etc
+- Need a clean command to kill all images and containers.
+- Automatically update the plugin on up (and any other comnmand!)
+- Share the npm cache directory.
+- Want built in timing so I know how longer commands are taking.
+- Automatically pull changes to template if it needs to be updated.
+- Need to call home so I can tell if people are using it!
+- Create a GUID during creation?
+  - Could this be an issue for copying a project?
+- How will I deploy a database?
+  - Will it be a plugin?
+- How do I version plugins? 
+    - Could just install them to a local cache directory.
+    - Shared would be better though.
+- Be good to load json from file or std input that specifies values for questions. 
+- Need to log verbosely to a log file in the Douleveo app data directory.
+- When adding caching, need per project and per system caching. Include the content hash in the cache key. That way the cache lookup won't yield results unless the content is the same.
+- Need a command to open the DL dashboard!
+- Could have plugins for doulevo for public docker images like mongo and redis
+- Could Doulevo be a package manager for Kubernetes? (could it just build on helm?)

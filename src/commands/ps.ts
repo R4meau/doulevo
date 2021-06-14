@@ -6,10 +6,9 @@ import { IConfiguration_id, IConfiguration } from "../services/configuration";
 import { IEnvironment, IEnvironment_id } from "../services/environment";
 import { IFs, IFs_id } from "../services/fs";
 import { Project } from "../lib/project";
-import { Plugin } from "../lib/plugin";
 
 @InjectableClass()
-export class LogsCommand implements IDoulevoCommand {
+export class PsCommand implements IDoulevoCommand {
 
     @InjectProperty(IEnvironment_id)
     environment!: IEnvironment;
@@ -26,7 +25,7 @@ export class LogsCommand implements IDoulevoCommand {
     async invoke(): Promise<void> {
 
         //
-        // The log command operates against the current working directory.
+        // The build command operates against the current working directory.
         // Or the path can be set with the --project=<path> argument.
         //
         const projectPath = this.configuration.getArg("project") || this.environment.cwd();
@@ -38,24 +37,19 @@ export class LogsCommand implements IDoulevoCommand {
         const configurationFile = await this.fs.readJsonFile(configurationFilePath);
         const project = new Project(projectPath, configurationFile);
 
-        const mode = this.configuration.getArg("mode") || "dev";
-        if (mode !== "prod" && mode !== "dev") {
-            throw new Error(`--mode can only be either "dev" or "prod".`);
-        }
-
-        const follow = this.configuration.getArg<boolean>("f") || this.configuration.getArg<boolean>("follow") || false;
-
         //
-        // Show logs.
+        // Do the build.
         //
-        await this.docker.logs(project, follow);
+        // TODO: Choose the current build plugin (eg "build/docker") based on project configuration.
+        //
+        await this.docker.ps(project);
     }
 }
 
 const command: IDoulevoCommandDesc = {
-    name: "logs",
-    description: "Shows logs from the container for the project in the working directory (or the directory specified by --project=<path>).",
-    constructor: LogsCommand,
+    name: "ps",
+    description: "View containers for the project in the working directory (or the directory specified by --project=<path>).",
+    constructor: PsCommand,
     help: {
         usage: "todo",
         message: "todo",

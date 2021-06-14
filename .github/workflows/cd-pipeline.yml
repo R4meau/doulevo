@@ -1,0 +1,88 @@
+name: Auto-publish and auto-release
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - prod
+jobs:
+  check-and-build:
+    name: Check status and build on version bump
+    outputs:
+      version: ${{ env.version }}
+      version_changed: ${{ steps.check.outputs.changed }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "12.16.3"
+
+      - name: Check version changes
+        uses: EndBug/version-check@v1
+        id: check
+        with:
+          diff-search: true
+
+      - name: Set version if updated
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          echo "version=${{ steps.check.outputs.version }}" >> $GITHUB_ENV
+
+      - name: Build
+        run: |
+          echo "Building ${{ env.tag }}"
+          npm ci
+          npx tsc src/index.ts
+
+  prepare-artifacts:
+    name: Platform-specific artifacts if version changed
+    needs: check-and-build
+    if: needs.check-and-build.outputs.version_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build for Windows
+        run: npm run build-win
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-files
+          path: |
+            doulevo*.exe
+          retention-days: 3
+          if-no-files-found: error
+
+  release-and-publish:
+    name: Release and publish on version bump
+    needs: [check-and-build, prepare-artifacts]
+    if: needs.check-and-build.outputs.version_changed == 'true' || needs.check-and-build.outputs.tag == 'latest'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "12.16.3"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: build-files
+
+      - name: Publish to npm
+        run: npm publish --access public --tag latest
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release with artifacts if version changed
+        if: needs.check-and-build.outputs.version_changed == 'true'
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Doulevo, Nick's variation v${{ needs.check-and-build.outputs.version }}
+          tag_name: v${{ needs.check-and-build.outputs.version }}
+          draft: false
+          files: doulevo*.js
+          fail_on_unmatched_files: true
