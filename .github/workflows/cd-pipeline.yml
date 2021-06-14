@@ -31,9 +31,8 @@ jobs:
 
       - name: Build
         run: |
-          echo "Building ${{ env.tag }}"
           npm ci
-          npx tsc src/index.ts
+          npx tsc -p .
 
   prepare-artifacts:
     name: Platform-specific artifacts if version changed
