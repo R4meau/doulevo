@@ -81,7 +81,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: Doulevo v${{ needs.check-and-build.outputs.version }}
+          name: Doulevo, Nick's variation v${{ needs.check-and-build.outputs.version }}
           tag_name: v${{ needs.check-and-build.outputs.version }}
           draft: false
           files: doulevo*.js
