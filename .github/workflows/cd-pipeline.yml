@@ -3,13 +3,12 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
       - prod
 jobs:
   check-and-build:
     name: Check status and build on version bump
     outputs:
-      tag: ${{ env.tag }}
+      version: ${{ env.version }}
       version_changed: ${{ steps.check.outputs.changed }}
     runs-on: ubuntu-latest
     steps:
@@ -25,34 +24,25 @@ jobs:
         with:
           diff-search: true
 
-      - name: Check latest tag
-        if: contains(github.ref, 'prod') || github.event_name == 'workflow_dispatch'
+      - name: Set version if updated
+        if: steps.check.outputs.changed == 'true'
         run: |
-          echo "tag=latest" >> $GITHUB_ENV
-
-      - name: Check versioned release
-        if: contains(github.ref, 'main')
-        run: echo "tag=v${{ steps.check.outputs.version }}" >> $GITHUB_ENV
+          echo "version=${{ steps.check.outputs.version }}" >> $GITHUB_ENV
 
       - name: Build
-        if: steps.check.outputs.changed == 'true'
         run: |
           echo "Building ${{ env.tag }}"
           npm ci
-          npx tsc index.ts
+          npx tsc src/index.ts
 
   prepare-artifacts:
-    name: Platform-specific builds
+    name: Platform-specific artifacts if version changed
     needs: check-and-build
     if: needs.check-and-build.outputs.version_changed == 'true'
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest]
+    runs-on: ubuntu-latest
     steps:
       - name: Build for Windows
-        if: matrix.os == 'windows-latest'
-        run: echo "This is where we build for Windows"
+        run: npm run build-win
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
@@ -66,7 +56,7 @@ jobs:
   release-and-publish:
     name: Release and publish on version bump
     needs: [check-and-build, prepare-artifacts]
-    if: needs.check-and-build.outputs.version_changed == 'true'
+    if: needs.check-and-build.outputs.version_changed == 'true' || needs.check-and-build.outputs.tag == 'latest'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -80,20 +70,19 @@ jobs:
         with:
           name: build-files
 
-      - name: Publish to npm if latest release
-        if: needs.check-and-build.outputs.tag == 'latest'
+      - name: Publish to npm
         run: npm publish --access public --tag latest
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Create GitHub Release with artifacts if versioned release
-        if: needs.check-and-build.outputs.tag != 'latest'
+      - name: Create GitHub Release with artifacts if version changed
+        if: needs.check-and-build.outputs.version_changed == 'true'
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: Doulevo ${{ needs.check-and-build.outputs.tag }}
-          tag_name: ${{ needs.check-and-build.outputs.tag }}
+          name: Doulevo v${{ needs.check-and-build.outputs.version }}
+          tag_name: v${{ needs.check-and-build.outputs.version }}
           draft: false
           files: doulevo*.js
           fail_on_unmatched_files: true
