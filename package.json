@@ -1,6 +1,6 @@
 {
   "name": "doulevo-nck",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Nick's variation of Doulevo for testing. Don't use in production.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
