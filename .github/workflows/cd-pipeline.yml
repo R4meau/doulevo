@@ -40,6 +40,12 @@ jobs:
     if: needs.check-and-build.outputs.version_changed == 'true'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "12.16.3"
+
       - name: Build for Windows
         run: npm run build-win
 
