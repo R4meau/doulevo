@@ -18,7 +18,7 @@
     "test": "jest --all",
     "tw": "npm run test:watch",
     "test:watch": "jest --watch --all",
-    "build-exe": "npm run test && npm run clean && npx tsc && npx nexe build/index.js"
+    "build-win": "npm run test && npm run clean && npx tsc && npx nexe build/index.js"
   },
   "bin": {
     "doulevo-nck": "./bin/cli"
